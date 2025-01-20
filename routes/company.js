@@ -46,18 +46,30 @@ companiesRouter.post('/new', function(req, res) {
 companiesRouter.get('/edit/:id', function(req, res) {
     if(req.session.username) {
         var id = req.params.id;
-        connection.query('SELECT * FROM company WHERE id = ?', [id], (error, results, fields) => {
+        connection.query('SELECT * FROM company WHERE companyId = ?', [id], (error, results, fields) => {
             if(error) throw error;
             if(results.length > 0) {
-                res.render();
+                console.dir(results);
+                res.render('editCompany', {companies: results[0]});
             }
         });
-        res.render('editCompany');
     } else {
-
+        res.redirect('/company/');
     }
 });
-companiesRouter.post('/edit/:id', function(req, res) {});
+companiesRouter.post('/edit/:id', function(req, res) {
+    if(req.session.username) {
+        var id = req.params.id;
+        connection.query('UPDATE company SET ? WHERE companyId = ' + id, {companyDesc: req.body.companyDesc, inActive: req.body.inActive ? true : false}, (error, results, fields) => {
+            if(error) throw error;
+            if(results.affectedRows > 0) {
+                res.redirect('/company/');
+            }
+        });
+    } else {
+        res.redirect('/company/');
+    }
+});
 companiesRouter.get('/:id', function(req, res) {});
 companiesRouter.get('/upload', function(req, res) {});
 companiesRouter.post('/upload', function(req, res) {});
