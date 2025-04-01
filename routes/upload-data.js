@@ -3,6 +3,7 @@ var uploadRouter = express.Router();
 var connection = require('./dbConfig');
 const fs = require('fs');
 const _ = require('lodash');
+const { readTransFile } = require('../utils-module/lib/readFiles');
 
 uploadRouter.get('/', function (req, res) {
     if (req.session.username) {
@@ -12,7 +13,7 @@ uploadRouter.get('/', function (req, res) {
     }
 
 });
-uploadRouter.post('/', function (req, res) {
+uploadRouter.post('/', function async (req, res) {
     if (req.session.username) {
         try {
             if (!req.files) {
@@ -24,6 +25,7 @@ uploadRouter.post('/', function (req, res) {
                 let data = [];
                 let status = false;
                 let message = "";
+                let readStatus = [];
                 // Loop through all the files
                 if (req.files.inHouseDataFiles.length === 4) {
                     _.forEach(_.keysIn(req.files.inHouseDataFiles), (key) => {
@@ -38,6 +40,8 @@ uploadRouter.post('/', function (req, res) {
                                 mimeType: file.mimeType,
                                 size: file.size
                             });
+                            readTransFile(file.name);
+                            
                             message = "Files uploaded successfully...";
                             status = true;
                         } else {
@@ -49,12 +53,13 @@ uploadRouter.post('/', function (req, res) {
                 }
                 res.send({
                     status: status,
-                    message: message
+                    message: message,
+                    data: data
                 });
             }
-            
+
         } catch (err) {
-            console.log(err.message);
+            console.log(err);
             res.status(500).send(err.message);
         }
     } else {
