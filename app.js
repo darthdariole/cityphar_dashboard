@@ -6,10 +6,13 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var expressSession = require('express-session');
+const fileUpload = require('express-fileupload');
 
 var authRouter = require('./routes/auth');
 var homeRouter = require('./routes/home');
 var companiesRouter = require('./routes/company');
+var customerRouter = require('./routes/customer');
+var uploadRouter = require('./routes/upload-data');
 
 var app = express();
 
@@ -27,6 +30,9 @@ app.use(expressSession({
   resave: true,
   saveUninitialized: true,
 }));
+app.use(fileUpload({
+  createCurrentPath:true
+}));
 
 app.use(express.static('public'));
 
@@ -37,6 +43,8 @@ app.get('/', function (req, res) {
 app.use('/auth', authRouter);
 app.use('/home', homeRouter);
 app.use('/company', companiesRouter);
+app.use('/customer', customerRouter);
+app.use('/upload', uploadRouter);
 
 
 // catch 404 and forward to error handler
