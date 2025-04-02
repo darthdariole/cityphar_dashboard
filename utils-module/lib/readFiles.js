@@ -62,3 +62,48 @@ exports.readTransFile = async (filename) => {
 }
 
 // TODO: Implement this function for remaining files
+exports.readCustFile = async (filename) => {
+
+    var connection = require("../../routes/dbConfig");
+
+    var fs = require('node:fs');
+    var lineReader = require('readline');
+    const fileStream = fs.createReadStream('./uploads/Customer.txt');
+
+    const rl = lineReader.createInterface({
+        input: fileStream,
+        crlfDelay: Infinity
+    });
+
+    var fileData = [];
+
+    for await (const line of rl) {
+        const splitline = line.split(" ");
+        const cleanedLine = splitline.filter((point) => point.trim() != '');
+        
+            fileData.push({
+                customerId: cleanedLine[0],
+                customerName: cleanedLine[2],
+                alternateId: cleanedLine[3],
+                quantity: cleanedLine[4],
+                tp: cleanedLine[5],
+                bonus: cleanedLine[6],
+                discount: cleanedLine[7],
+                batchNo: cleanedLine[8],
+                expiry: cleanedLine[9],
+                customerId: cleanedLine[10],
+                transactionType: cleanedLine[11],
+            });
+        
+        }
+    }
+    if (fileData.length > 0) {
+        for (const object of fileData) {
+            var query = connection.query("INSERT INTO customer SET ?", object, (error, results, fields) => {
+                if (error) console.error(error.sqlMessage);
+            });
+        }
+    }
+    
+    return fileData;
+}
